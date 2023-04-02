@@ -7,11 +7,21 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import frc.Constants;
 import frc.lib.Signal.Annotations.Signal;
 import frc.robot.Drivetrain.DrivetrainControl;
 
 public class AutoDrive {
 
+       /* Singleton infrastructure */
+       private static AutoDrive instance;
+       public static AutoDrive getInstance() {
+           if (instance == null) {
+               instance = new AutoDrive();
+           }
+           return instance;
+       }
+   
     //Team 1619-inspired driver assist module
     // Normally, the operator provides manual motion inputs
     // However, when commanded, this class will generate a trajectory on the fly
@@ -78,6 +88,13 @@ public class AutoDrive {
     public AutoDrive(){
 
     }
+
+    public void transformRobot(double forward, double sideright, double turnright, boolean robor) {
+        double f_fwrd = forward*Constants.SWERVE_FWD_REV_CMD_SIGN*-1*Constants.MAX_FWD_REV_SPEED_MPS;
+        double f_side = sideright*Constants.SWERVE_SIDE_TO_SIDE_CMD_SIGN*Constants.MAX_FWD_REV_SPEED_MPS;
+        double f_spin = turnright*Constants.MAX_ROTATE_SPEED_RAD_PER_SEC;
+        setManualCommands(f_fwrd,f_side,f_spin,!robor);
+      }
 
     public void setManualCommands(double fwdRevCmd, double strafeCmd, double rotateCmd, boolean fieldRelativeCmd){
         manualFwdRevCmd = fwdRevCmd;

@@ -8,8 +8,10 @@ import frc.Constants;
 
 public class AutoTrajectoryConstants {
 
+    //YN: (todo) - Is this the max speed we want?
     public static final double MAX_AUTO_DT_SPEED_FPS = Units.feetToMeters(14.0);
 
+    //YN: (todo) - Is this the default start position we want?
     /** Default starting position if autonomous does not provide a different pose. */
     public static final Pose2d DEFAULT_START_POSE = new Pose2d(3.0, 3.0, new Rotation2d());
 

@@ -12,6 +12,8 @@ public abstract class AbstractSimmableMotorController {
     public abstract void setVoltageCmd(double cmd_v);
     public abstract void resetDistance();
     public abstract double getCurrent_A();
+    public abstract void setSoftLimits(float fwd, float rev, boolean e);
+    public abstract void setCurrent_A(int a);
     public abstract double getVelocity_radpersec();
     public abstract double getPosition_rad();
     public abstract double getAppliedVoltage_V();

@@ -35,10 +35,11 @@ public class PoseTelemetry {
     Signal xPosActFtSig;
     Signal yPosActFtSig;
     Signal tRotActDegSig;
+    Signal tRotActDreSig;
 
     Pose2d actualPose = new Pose2d();
     Pose2d desiredPose = new Pose2d();
-    Pose2d estimatedPose = new Pose2d();
+    public Pose2d estimatedPose = new Pose2d();
 
 
 
@@ -54,6 +55,7 @@ public class PoseTelemetry {
         xPosActFtSig     = new Signal("pose_ACT_x", "m");
         yPosActFtSig     = new Signal("pose_ACT_y", "m");
         tRotActDegSig    = new Signal("pose_ACT_rot", "rad");
+        tRotActDreSig    = new Signal("pose_ACT_rotate", "deg");
 
         SmartDashboard.putData("Field", field);
 
@@ -68,11 +70,16 @@ public class PoseTelemetry {
     public void setEstimatedPose(Pose2d est){
         estimatedPose = est;
     }
+    public Pose2d getEstimatedPose() {
+        return estimatedPose;
+    }
 
     public void update(double time){
         xPosActFtSig.addSample(time,  (actualPose.getTranslation().getX()));
         yPosActFtSig.addSample(time,  (actualPose.getTranslation().getY()));
         tRotActDegSig.addSample(time, actualPose.getRotation().getRadians());
+
+        tRotActDreSig.addSample(time, actualPose.getRotation().getDegrees());
 
         xPosDesFtSig.addSample(time,  (desiredPose.getTranslation().getX()));
         yPosDesFtSig.addSample(time,  (desiredPose.getTranslation().getY()));

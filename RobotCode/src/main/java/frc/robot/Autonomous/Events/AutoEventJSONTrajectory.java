@@ -42,6 +42,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class AutoEventJSONTrajectory extends AutoEvent {
 
+    // todo - Validate this constant.  Used only in this file.
     final double MODULE_ANGLE_INIT_TIME_SEC = 0.25;
 
     double trajStartTime = 0;

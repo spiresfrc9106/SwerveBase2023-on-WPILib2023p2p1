@@ -6,6 +6,7 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
@@ -20,20 +21,20 @@ public class RealSparkMax extends AbstractSimmableMotorController {
     private SparkMaxPIDController m_pidController;
     private RelativeEncoder m_encoder;
 
-
-    public RealSparkMax(int can_id){
+    public RealSparkMax(int can_id, int currentLimitAmps){
         m_motor = new CANSparkMax(can_id, MotorType.kBrushless);
 
         boolean success = false;
 
         while(!success){    
             var err0 = m_motor.restoreFactoryDefaults();
-            var err1 = m_motor.setIdleMode(IdleMode.kCoast);
+            var err1 = m_motor.setIdleMode(IdleMode.kBrake);
             var err2 = m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 19);// Status 0 = Motor output and Faults
             var err3 = m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 57);// Status 1 = Motor velocity & electrical data
             var err4 = m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 65500);// Status 2 = Motor Position
             var err5 = m_motor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 65500);// Status 3 = Analog Sensor Input
-            var err6 = m_motor.setSmartCurrentLimit(40); // 40 A current limit
+            var err6 = m_motor.setSmartCurrentLimit(currentLimitAmps); //current limit
+        
             success = (err0 == REVLibError.kOk &&
                        err1 == REVLibError.kOk &&
                        err2 == REVLibError.kOk &&
@@ -41,9 +42,9 @@ public class RealSparkMax extends AbstractSimmableMotorController {
                        err4 == REVLibError.kOk &&
                        err5 == REVLibError.kOk &&
                        err6 == REVLibError.kOk );
-        
+
             if(!success){
-                System.out.println("Configuration Failed, retrying....");
+                System.out.println("Configuration Failed, cand_id="+ can_id+", retrying....");
             }
         }
         m_pidController = m_motor.getPIDController();
@@ -51,6 +52,20 @@ public class RealSparkMax extends AbstractSimmableMotorController {
         
     }
 
+    @Override
+    public void setSoftLimits(float fwdLimit, float revLimit, boolean enable) {
+        m_motor.enableSoftLimit(SoftLimitDirection.kForward, enable);
+        m_motor.enableSoftLimit(SoftLimitDirection.kReverse, enable);
+        if (enable) {
+            m_motor.setSoftLimit(SoftLimitDirection.kForward, fwdLimit);
+            m_motor.setSoftLimit(SoftLimitDirection.kReverse, revLimit);
+        }
+    }
+
+    @Override
+    public void setCurrent_A(int currentLimit_A) {
+        m_motor.setSmartCurrentLimit(currentLimit_A);
+    }
 
     @Override
     public void setInverted(boolean invert) {

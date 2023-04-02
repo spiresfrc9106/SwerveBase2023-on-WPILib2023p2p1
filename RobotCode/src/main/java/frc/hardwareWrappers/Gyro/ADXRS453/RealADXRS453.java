@@ -42,5 +42,18 @@ public class RealADXRS453 extends AbstractGyro {
     public boolean isConnected() {
         return realGyro.isConnected();
     }
+
+    @Override
+    public double getRoll_deg() {
+        // todo
+        return 0;
+    }
+    
+    @Override
+    public double getPitch_deg() {
+        // todo
+        return 0;
+    }
+
     
 }

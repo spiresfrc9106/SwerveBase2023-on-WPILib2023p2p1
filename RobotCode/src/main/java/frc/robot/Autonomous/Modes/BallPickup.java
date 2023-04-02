@@ -5,6 +5,7 @@ import frc.lib.AutoSequencer.AutoSequencer;
 import frc.lib.Autonomous.AutoMode;
 import frc.robot.Autonomous.Events.AutoEventJSONTrajectory;
 
+//YN: (todo)
 public class BallPickup extends AutoMode {
 
     AutoEventJSONTrajectory driveEvent = null;

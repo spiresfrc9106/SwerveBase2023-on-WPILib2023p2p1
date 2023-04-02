@@ -37,11 +37,21 @@ public class SimSmartMotor extends AbstractSimmableMotorController {
         SimDeviceBanks.addCANDevice(this, can_id);
     }
 
+    public void setCurrent_A(int currentLimit) {
+  
+    }
+
 
     @Override
     public void setInverted(boolean invert) {
         isInverted = invert;
     }
+
+    
+    @Override
+    public void setSoftLimits(float fwd, float rev, boolean e) {
+    }
+
 
 
     @Override

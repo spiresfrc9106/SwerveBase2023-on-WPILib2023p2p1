@@ -39,6 +39,7 @@ public class AutoEventDriveTime extends AutoEvent {
     double duration = 0;
     double speed_mps = 0;
 
+    //YN: (todo) - Validate these constants.  Used only in this file.
     final double HEADING_P_GAIN = -0.5;
     final double RAMP_TIME = 0.75;
     final double INIT_TIME = 0.35;

@@ -17,9 +17,8 @@ import edu.wpi.first.math.util.Units;
 
 import frc.Constants;
 import frc.hardwareWrappers.Gyro.WrapperedGyro;
-import frc.hardwareWrappers.Gyro.WrapperedGyro.GyroType;
 import frc.lib.Signal.Annotations.Signal;
-import frc.robot.Drivetrain.Camera.PhotonCamWrapper;
+//import frc.robot.Drivetrain.Camera.PhotonCamWrapper;
 
 public class DrivetrainPoseEstimator {
 
@@ -34,13 +33,13 @@ public class DrivetrainPoseEstimator {
 
     Pose2d curEstPose = new Pose2d(Constants.DFLT_START_POSE.getTranslation(), Constants.DFLT_START_POSE.getRotation());
 
-    WrapperedGyro gyro;
+    public WrapperedGyro gyro;
 
     //SwerveDrivePoseEstimator<N7, N7, N5> m_poseEstimator;
 
     SwerveDrivePoseEstimator m_poseEstimator;
 
-    List<PhotonCamWrapper> cams = new ArrayList<PhotonCamWrapper>();
+    //List<PhotonCamWrapper> cams = new ArrayList<PhotonCamWrapper>();
 
     //Trustworthiness of the internal model of how motors should be moving
     // Measured in expected standard deviation (meters of position and degrees of rotation)
@@ -57,11 +56,12 @@ public class DrivetrainPoseEstimator {
 
     private DrivetrainPoseEstimator(){
 
-        cams.add(new PhotonCamWrapper("FRONT_CAM", Constants.robotToFrontCameraTrans)); 
-        cams.add(new PhotonCamWrapper("REAR_CAM", Constants.robotToRearCameraTrans)); 
+        // todo
+        //cams.add(new PhotonCamWrapper("FRONT_CAM", Constants.robotToFrontCameraTrans)); 
+        //cams.add(new PhotonCamWrapper("REAR_CAM", Constants.robotToRearCameraTrans)); 
         //TODO add more cameras here
 
-        gyro = new WrapperedGyro(GyroType.ADXRS453);
+        gyro = WrapperedGyro.getInstance();
 
         //Temp default - will poopulate with real valeus in the resetPosition method
         SwerveModulePosition[] initialStates = {new SwerveModulePosition(),new SwerveModulePosition(),new SwerveModulePosition(),new SwerveModulePosition()};
@@ -106,12 +106,12 @@ public class DrivetrainPoseEstimator {
         Transform2d deltaPose = new Transform2d(prevEstPose, curEstPose);
         curSpeed = Units.metersToFeet(deltaPose.getTranslation().getNorm()) / Constants.Ts;
 
-        for(var cam : cams){
-            cam.update();
-            for(var obs : cam.getCurObservations()){
-                m_poseEstimator.addVisionMeasurement(obs.estFieldPose, obs.time, visionMeasurementStdDevs.times(1.0/obs.trustworthiness));
-            }
-        }
+        //for(var cam : cams){
+          //  cam.update();
+            //for(var obs : cam.getCurObservations()){
+              //  m_poseEstimator.addVisionMeasurement(obs.estFieldPose, obs.time, visionMeasurementStdDevs.times(1.0/obs.trustworthiness));
+            //}
+        //}
 
     }
 
@@ -123,14 +123,14 @@ public class DrivetrainPoseEstimator {
         return curSpeed;
     }
 
-    public boolean getVisionTargetsVisible(){
-        for(var cam:cams){
-            if(cam.getCurTargetCount() > 0){
-                return true;
-            }
-        }
-        return false;
-    }
+    //public boolean getVisionTargetsVisible(){
+      //  for(var cam:cams){
+        //    if(cam.getCurTargetCount() > 0){
+          //      return true;
+            //}
+        //}
+        //return false;
+    //}
 
 
 }

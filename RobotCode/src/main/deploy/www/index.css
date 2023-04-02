@@ -23,7 +23,7 @@ a.bigLinkButton {
     display: block;
     width: auto;
     height: auto;
-    background: #222222;
+    background: #F8CD46;
     padding: 10px 5px;
     margin: 10px 5px;
     text-align: center;
@@ -35,11 +35,11 @@ a.bigLinkButton {
 }
 
 a.bigLinkButton:hover {
-    background: #533;
+    background: #3C92E6;
     color: white;
  }
  a.bigLinkButton:active {
-    background: #555;
+    background: #F8CD46;
  }
  a.bigLinkButton:disabled {
     background: black;

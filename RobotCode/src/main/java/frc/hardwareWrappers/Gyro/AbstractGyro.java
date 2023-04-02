@@ -8,5 +8,7 @@ public abstract class AbstractGyro {
     public abstract double getRate();
     public abstract double getRawAngle();
     public abstract boolean isConnected();
+    public abstract double getRoll_deg();
+    public abstract double getPitch_deg();
     
 }

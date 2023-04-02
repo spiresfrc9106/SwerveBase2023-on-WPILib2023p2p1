@@ -5,6 +5,7 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SPI.Port;
 import frc.hardwareWrappers.Gyro.AbstractGyro;
+import frc.robot.ChargeStationBalancer;
 
 public class RealNavx extends AbstractGyro {
 
@@ -43,5 +44,16 @@ public class RealNavx extends AbstractGyro {
     public boolean isConnected() {
         return ahrs.isConnected();
     }
+
+    @Override
+    public double getRoll_deg() {
+        return ahrs.getRoll();
+    }
+    
+    @Override
+    public double getPitch_deg() {
+        return ahrs.getPitch();
+    }
+
     
 }

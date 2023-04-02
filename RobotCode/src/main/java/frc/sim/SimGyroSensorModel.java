@@ -11,6 +11,8 @@ public class SimGyroSensorModel{
     SimGyro gyroSim;
     double gyroPosReading_deg;
 
+    // todo - Does this need to change for the NavX gyro?
+    //YN: idk
     // Limit what the gyro itself can read
     // Ex for ADSRX453 - https://www.analog.com/media/en/technical-documentation/data-sheets/ADXRS453.pdf
     final double GYRO_RATE_SCALING_DEGPERSEC_PER_BIT = 1.0/80.0;

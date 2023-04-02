@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
+import frc.Constants;
 import frc.lib.Calibration.CalWrangler;
 import frc.lib.LoadMon.RIOLoadMonitor;
 import frc.lib.LoadMon.SegmentTimeTracker;
@@ -23,9 +24,18 @@ import frc.lib.Signal.Annotations.Signal;
 import frc.lib.Webserver2.Webserver2;
 import frc.robot.AutoDrive.AutoDrive;
 import frc.robot.AutoDrive.AutoDrive.AutoDriveCmdState;
+import frc.robot.Autonomous.AutoPickupSystem;
 import frc.robot.Autonomous.Autonomous;
 import frc.robot.Drivetrain.DrivetrainControl;
 import frc.sim.RobotModel;
+import frc.robot.Arm.ArmPivotControl;
+import frc.robot.Arm.ClawControl;
+import frc.robot.Arm.ArmPivotControl.AutoArmPivotCtrl;
+import frc.robot.Arm.ClawControl.AutoClawFingerCtrl;
+//NEW
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.RobotController;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -35,11 +45,14 @@ import frc.sim.RobotModel;
  */
 public class Robot extends TimedRobot {
 
+  private boolean enableCameras = false;
+
   public static double loopStartTime;
 
   ///////////////////////////////////////////////////////////////////
   // Instatntiate new classes after here 
   // ...
+
 
   // Website utilities
   Webserver2 webserver;
@@ -52,14 +65,23 @@ public class Robot extends TimedRobot {
 
   // Main Driver
   DriverInput di;
+  DriverInput pi;
 
   //Drivetrain and drivetrain accessories
   DrivetrainControl dt;
   AutoDrive ad;
+  ClawControl fng;
+  ArmPivotControl armPvt;
 
   // Autonomous Control Utilities
   Autonomous auto;
   PoseTelemetry pt;
+
+  AutoPickupSystem autoalign;
+
+  // Cameras
+
+  CenterCamera cc;
 
   SegmentTimeTracker stt;
 
@@ -68,9 +90,18 @@ public class Robot extends TimedRobot {
   @Signal(units = "sec")
   double mainLoopPeriod;
 
+  @Signal(units = "in")
+  double sonarDistance_in = 0;
+
+  public double arm_speed_radpersec;
+
   final double ANGULAR_P = 0.1;
   final double ANGULAR_D = 0.0;
   PIDController turnController = new PIDController(ANGULAR_P, 0, ANGULAR_D);
+
+  private final AnalogInput ultrasonic = new AnalogInput(0);
+
+
   // ... 
   // But before here
   ///////////////////////////////////////////////////////////////////
@@ -79,10 +110,12 @@ public class Robot extends TimedRobot {
   ///////////////////////////////////////////////////////////////////
   // Do one-time initilization here
   ///////////////////////////////////////////////////////////////////
+
+
   @Override
   public void robotInit() {
 
-    stt = new SegmentTimeTracker("Robot.java", 0.25);
+    stt = new SegmentTimeTracker("Robot.java", 0.02);
 
     stt.start();
 
@@ -106,25 +139,42 @@ public class Robot extends TimedRobot {
     loadMon = new RIOLoadMonitor();
     stt.mark("RIO Load Monitor");
 
-    batMan = BatteryMonitor.getInstance();
+    //yavinNote: uncomment to debug the battery monitor; why is the battery monitor crashing?
+    //batMan = BatteryMonitor.getInstance();
+
     stt.mark("Battery Monitor");
 
     //bcd = new Ballcolordetector();
     stt.mark("Ball Color Detector");
 
     di = new DriverInput(0);
+    pi = new DriverInput(1);
     stt.mark("Driver IO");
 
     dt = DrivetrainControl.getInstance();
-    ad = new AutoDrive();
+    ad = AutoDrive.getInstance();
     stt.mark("Drivetrain Control");
 
+    fng = ClawControl.getInstance();
+    stt.mark("Claw Control");
+
+    armPvt = ArmPivotControl.getInstance();
+    stt.mark("Arm Pivot Control");
+
     auto = Autonomous.getInstance();
-    auto.loadSequencer();
+    //auto.loadSequencer();
     stt.mark("Autonomous");
+
+    autoalign = AutoPickupSystem.getInstance();
 
     pt = PoseTelemetry.getInstance();
     stt.mark("Pose Telemetry");
+
+    if (enableCameras) {
+      cc = CenterCamera.getInstance();
+      stt.mark("Cameras");
+    }
+
 
     db = new Dashboard(webserver);
     stt.mark("Dashboard");
@@ -141,6 +191,7 @@ public class Robot extends TimedRobot {
     webserver.startServer();
     stt.mark("Webserver Startup");
 
+    // todo - Remove or change for our camera system.
     PhotonCamera.setVersionCheckEnabled(false);
     stt.mark("Photonvision Config");
 
@@ -158,25 +209,25 @@ public class Robot extends TimedRobot {
   ///////////////////////////////////////////////////////////////////
   @Override
   public void autonomousInit() {
+    //System.out.println("auto-init ran");
     SignalWrangler.getInstance().logger.startLoggingAuto();
     //Reset sequencer
     auto.reset();
-    auto.startSequencer();
+    //auto.startSequencer();
 
+    auto.allowRun();
     // Ensure simulation resets to correct pose at the start of autonomous
     syncSimPoseToEstimate();
-
   }
 
   @Override
   public void autonomousPeriodic() {
+    //System.out.println("auto-periodic ran");
     stt.start();
     loopStartTime = Timer.getFPGATimestamp();
-
     //Step the sequencer forward
     auto.update();
     stt.mark("Auto Update");
-
   }
 
   
@@ -185,7 +236,7 @@ public class Robot extends TimedRobot {
   ///////////////////////////////////////////////////////////////////
   @Override
   public void teleopInit() {
-   
+    auto.blockRun();
     SignalWrangler.getInstance().logger.startLoggingTeleop();
   }
 
@@ -195,22 +246,188 @@ public class Robot extends TimedRobot {
     loopStartTime = Timer.getFPGATimestamp();
 
     di.update();
+    pi.update();
     stt.mark("Driver Input");
 
     /////////////////////////////////////
     // Drivetrain Input Mapping
 
-    if(di.getSpinMoveCmd()){
-      ad.setCmd(AutoDriveCmdState.DO_A_BARREL_ROLL);
-    } else if (di.getDriveToCenterCmd()){
-      ad.setCmd(AutoDriveCmdState.DRIVE_TO_CENTER);
-    } else {
-      ad.setCmd(AutoDriveCmdState.MANUAL);
+    boolean automaticSwerve = false;
+    if (di.getdoAutoObjectAlign()) {
+      automaticSwerve = true;
     }
 
-    ad.setManualCommands(di.getFwdRevCmd_mps(), di.getSideToSideCmd_mps(), di.getRotateCmd_rps(), !di.getRobotRelative());
+    if(pi.getClawOpen()){
+      fng.setFinger(AutoClawFingerCtrl.OPEN_PHALANGES);
+    }
+    else if (pi.getClawCube()){
+      fng.setFinger(AutoClawFingerCtrl.CLOSE_FOR_CUBE);
+    }
+    else if (pi.getClawCone()) {
+      fng.setFinger(AutoClawFingerCtrl.CLOSE_FOR_CONE);
+    }
+    else if (pi.getClawStop()) {
+      fng.setFinger(AutoClawFingerCtrl.STOP_PHALANGES);
+    }
+    else {
+      //YN: took this out to see if the command was stopping the claw from working
+      //YN: if no new commands, the close and open limits will remain constant
+      //fng.setFinger(AutoClawFingerCtrl.STOP_PHALANGES);
+    }
 
-    ad.update();
+    boolean armExistsAngle = false;
+    double desiredArmAngle = -2;
+    if(pi.getArmDown()){
+      desiredArmAngle = -130;
+      armExistsAngle = true;
+    }
+    else if (pi.getArmFront()){
+      desiredArmAngle = -90;
+      armExistsAngle = true;
+    }
+    else if (pi.getArmUp()) {
+      desiredArmAngle = -60;
+      armExistsAngle = true;
+    }
+    else if (pi.getArmBack()) {
+      desiredArmAngle = -2;
+      armExistsAngle = true;
+    }
+    
+    if (armExistsAngle) {
+      double angle = armPvt.absoluteAngleArm_deg;
+      if (angle<(desiredArmAngle) && (desiredArmAngle-angle)>2) {
+        //angle -90, desired -60
+        // -60 --90 == 30, >2
+        if ((desiredArmAngle-angle)>30) {
+          armPvt.setArmSpeed(0.9*Constants.ARM_PIVOT_CMD_SCALAR_SPEED_RAD_PER_SEC);
+        }
+        else {
+          armPvt.setArmSpeed(0.7*Constants.ARM_PIVOT_CMD_SCALAR_SPEED_RAD_PER_SEC);
+        }
+        armPvt.setArm(AutoArmPivotCtrl.MOVE_UP);
+      }
+      else if (angle>(desiredArmAngle) && (angle-(desiredArmAngle))>2) {
+        //angle -30, desired -60
+        // -30 --60 = 30
+        if ((angle-(desiredArmAngle))>30) {
+          armPvt.setArmSpeed(0.9*Constants.ARM_PIVOT_CMD_SCALAR_SPEED_RAD_PER_SEC);
+        }
+        else {
+          armPvt.setArmSpeed(0.7*Constants.ARM_PIVOT_CMD_SCALAR_SPEED_RAD_PER_SEC);
+        }
+        armPvt.setArm(AutoArmPivotCtrl.MOVE_DOWN);
+      } else {
+          armPvt.setArmSpeed(0);
+          armPvt.setArm(AutoArmPivotCtrl.STOP_MOVEMT);
+      }
+    }
+    else {
+      arm_speed_radpersec = pi.getArmSpeed_radpersec();
+
+      armPvt.setArmSpeed(arm_speed_radpersec);
+      if (arm_speed_radpersec<0) {
+        armPvt.setArmSpeed(arm_speed_radpersec); //smaller accounting gravity
+        armPvt.setArm(AutoArmPivotCtrl.MOVE_DOWN);
+      }
+      else if (arm_speed_radpersec>0) {
+        armPvt.setArm(AutoArmPivotCtrl.MOVE_UP);
+      }
+      else {
+        armPvt.setArm(AutoArmPivotCtrl.STOP_MOVEMT);
+      }
+    }
+
+
+
+    if (pi.getRemoveSoftLimits() == true) {
+      System.out.println("Disabled soft limits for Robot Arm");
+    }
+/*
+    double d_fwrd = di.getFwdRevCmd_mps();
+    double d_side = di.getSideToSideCmd_mps();
+    double d_spin = di.getRotateCmd_radpersec();
+    double p_fwrd = pi.getFwdRevCmd_mps();
+    double p_side = pi.getSideToSideCmd_mps();
+    double p_spin = pi.getRotateCmd_radpersec();*/
+    boolean robor = di.getRobotRelative();
+    double f_fwrd = di.getFwdRevCmd_mps();
+    double f_side = di.getSideToSideCmd_mps();
+    double f_spin = di.getRotateCmd_radpersec();/*
+    if (robor==true) {
+      //ignore up/down left/right cmd from pi
+      f_fwrd = d_fwrd;
+      f_side = d_side;
+      //but... rotation can still work
+      f_spin = d_spin+p_spin;
+    }
+    else {
+      f_fwrd = d_fwrd + p_fwrd;
+      f_side = d_side + p_side;
+      f_spin = d_spin + p_spin;
+    }*/
+    if (automaticSwerve==false) {
+      ad.setManualCommands(f_fwrd,f_side,f_spin,!robor);
+    }
+    else {
+      autoalign.update(sonarDistance_in);
+      ad.setManualCommands(autoalign.fwdVelocity_mps, 0, autoalign.azVelocity, false);
+    }
+
+    db.fbctrl = di.getFwdRevCmd_mps();
+    db.lrctrl = di.getSideToSideCmd_mps();
+    db.rotcmd = di.getRotateCmd_radpersec();
+    db.fblrc = Math.sqrt((db.fbctrl*db.fbctrl)+(db.lrctrl*db.lrctrl));
+
+    if (db.fblrc<0) {
+      db.fblrc = db.fblrc*-1;
+    }
+    if (db.rotcmd<0) {
+      db.rotcmd=db.rotcmd*-1;
+    }
+
+    db.dpresetU = di.presetU;
+    db.dpresetD = di.presetD;
+    db.dpresetL = di.presetL;
+    db.dpresetR = di.presetR;
+
+    if (di.presetU==false&&di.presetD==false&&di.presetR==false&&di.presetL==false) {
+      db.presetNone = true;
+    }
+    else {
+      db.presetNone = false;
+    }
+
+    db.isAligned = di.matchedBasically;
+    if (di.getArmSpeed_radpersec()<0) {
+    db.armspeed = di.getArmSpeed_radpersec()*-1;
+    db.armdirectionl = false;  //YN: might need to switch this if directions are opp
+    db.armdirectionr = true;
+    }
+    else if (di.getArmSpeed_radpersec()>1){
+    db.armspeed = di.getArmSpeed_radpersec();
+    db.armdirectionl = true;
+    db.armdirectionr = false;
+    }
+    else {
+      db.armspeed = di.getArmSpeed_radpersec();
+      db.armdirectionl = false;
+      db.armdirectionr = false; 
+    }
+
+    db.bumpone = di.alignRobotDir;
+    db.bumptwo = di.robotRelative;
+    db.rightst = di.rightStickButtonCode;
+    db.leftst = di.leftStickButtonCode;
+
+    if (di.alignRobotDir==false) {
+      db.bumpthree = true;
+    }
+    else {
+      db.bumpthree = false;
+    }
+
+    //ad.update();
 
 
     if(di.getOdoResetCmd()){
@@ -256,26 +473,38 @@ public class Robot extends TimedRobot {
   ///////////////////////////////////////////////////////////////////
   @Override
   public void robotPeriodic() {
+    
+    sonarDistance_in = getSonarDistance();
 
+    if (enableCameras) {
+      cc.update();
+    }
 
+    stt.mark("Camera Update");
     if(DriverStation.isTest() && !DriverStation.isDisabled()){
       dt.testUpdate();
+      stt.mark("Drivetrain  ");
     } else {
       dt.update();
+      stt.mark("Drivetrain  ");
+      fng.update();
+      stt.mark("Fingers     ");
+      armPvt.update();
+      stt.mark("Arm         ");
     }
-    stt.mark("Drivetrain");
 
 
     cw.update();
     stt.mark("Cal Wrangler");
     db.updateDriverView();
-    stt.mark("Dashboard");
+    stt.mark("Dashboard   ");
     telemetryUpdate();
-    stt.mark("Telemetry");
+    stt.mark("Telemetry   ");
     
 
     stt.end();
 
+    ad.update();
 
   }
 
@@ -283,6 +512,8 @@ public class Robot extends TimedRobot {
     double time = loopStartTime;
 
     dt.updateTelemetry();
+    fng.updateTelemetry();
+    armPvt.updateTelemetry();
 
     pt.setDesiredPose(dt.getCurDesiredPose());
     pt.setEstimatedPose(dt.getCurEstPose());
@@ -338,4 +569,14 @@ public class Robot extends TimedRobot {
   }
 
 
+  public double getSonarDistance() {
+    double rawValue = ultrasonic.getValue();
+    double voltage_scale_factor = 5/RobotController.getVoltage5V();
+    //double currentDistanceCentimeters = rawValue * voltage_scale_factor * 0.125;
+    double currentDistanceInches = rawValue * voltage_scale_factor * 0.0492;
+
+    sonarDistance_in = currentDistanceInches;
+
+    return currentDistanceInches;
+  }
 }

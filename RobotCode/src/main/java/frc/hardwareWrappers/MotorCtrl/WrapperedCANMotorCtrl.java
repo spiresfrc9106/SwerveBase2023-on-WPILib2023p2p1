@@ -30,7 +30,7 @@ public class WrapperedCANMotorCtrl {
     @Signal(units = "rad")
     private double actPos;
 
-    public WrapperedCANMotorCtrl(String prefix, int can_id, CANMotorCtrlType type){
+    public WrapperedCANMotorCtrl(String prefix, int can_id, CANMotorCtrlType type, int currentLimitAmps){
 
         System.out.print("=> Starting motor controller init for " + prefix + " CANID = " + Integer.toString(can_id));
 
@@ -39,10 +39,10 @@ public class WrapperedCANMotorCtrl {
         } else {
             switch(type){
                 case TALON_FX:
-                    ctrl = new RealTalonFX(can_id);
+                    ctrl = new RealTalonFX(can_id, currentLimitAmps);
                     break;
                 case SPARK_MAX:
-                    ctrl = new RealSparkMax(can_id);
+                    ctrl = new RealSparkMax(can_id, currentLimitAmps);
                     break;
             }
         }
@@ -56,6 +56,15 @@ public class WrapperedCANMotorCtrl {
         actPos = ctrl.getPosition_rad();
         current = ctrl.getCurrent_A();
         appliedVoltage = ctrl.getAppliedVoltage_V();
+    }
+
+    public void setCurrent_A(int currentLimit_A) {
+        ctrl.setCurrent_A(currentLimit_A);
+    }
+
+    public void setSoftLimits(float fwd, float rev, boolean e) {
+        
+        ctrl.setSoftLimits(fwd, rev, e);
     }
 
     public void setInverted(boolean invert){
@@ -91,5 +100,8 @@ public class WrapperedCANMotorCtrl {
         ctrl.resetDistance();
     }
 
+    public double getAppliedVoltage_V() {
+        return ctrl.getAppliedVoltage_V();
+    }
 
 }

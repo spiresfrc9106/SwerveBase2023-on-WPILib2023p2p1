@@ -25,7 +25,7 @@ public class DynamicSwerveTrajectoryGenerator {
     double trajStart_s = 0;
     List<Translation2d> curInteriorWaypoints = null;
 
-
+    //YN: (todo) - Is this the max speed we want?
     final double TRAJ_SPEED_MPS = Units.feetToMeters(10); //hardcode max speed
 
     TrapezoidProfile timeProfile = null;

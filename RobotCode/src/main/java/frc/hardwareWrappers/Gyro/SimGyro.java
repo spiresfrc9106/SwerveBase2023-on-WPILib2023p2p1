@@ -9,7 +9,9 @@ public class SimGyro extends AbstractGyro {
     double angle; // in rad
 
     public SimGyro(){
-        SimDeviceBanks.addSPIDevice(this, 0); //todo are we actually on CS 0?
+    // configureMe-9106   Update these for our robot design??
+	// yavinNote: no change - it's a sim
+        SimDeviceBanks.addSPIDevice(this, 0);
     }
 
     @Override
@@ -37,6 +39,18 @@ public class SimGyro extends AbstractGyro {
     @Override
     public boolean isConnected() {
         return true;
+    }
+
+    @Override
+    public double getRoll_deg() {
+        // todo
+        return 0;
+    }
+    
+    @Override
+    public double getPitch_deg() {
+        // todo
+        return 0;
     }
 
     public void simUpdate(double newRate_radpersec){

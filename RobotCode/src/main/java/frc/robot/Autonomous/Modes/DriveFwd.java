@@ -12,12 +12,14 @@ public class DriveFwd extends AutoMode {
 
     @Override
     public void addStepsToSequencer(AutoSequencer seq) {
+        //YN: (todo) - How to determine the values of these constants?
         driveEvent = new AutoEventDriveTime(1.8, 1.0, this.getInitialPose().getRotation().getRadians()); //about a robot length and a half
         seq.addEvent(driveEvent); 
     }
 
     @Override
     public Pose2d getInitialPose(){
+        //YN: (todo) - configureMe9106  What are these values based upon?
         return new Pose2d(10.109, 5.717,
                           Rotation2d.fromDegrees(45.0)
                           );

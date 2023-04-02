@@ -12,10 +12,9 @@ public class Steak extends AutoMode {
     @Override
     public void addStepsToSequencer(AutoSequencer seq) {
         driveEvent1 = new AutoEventJSONTrajectory("many_Pickup1", 0.7);
-        seq.addEvent(driveEvent1);
+        //seq.addEvent(driveEvent1);
         driveEvent2 = new AutoEventJSONTrajectory("many_Pickup2", 0.65);
-        seq.addEvent(driveEvent2);
-       
+        //seq.addEvent(driveEvent2);
     }
 
     @Override

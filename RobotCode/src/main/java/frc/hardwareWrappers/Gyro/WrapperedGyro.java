@@ -2,12 +2,25 @@ package frc.hardwareWrappers.Gyro;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.hardwareWrappers.Gyro.ADXRS453.RealADXRS453;
+import frc.hardwareWrappers.Gyro.NavX.RealNavx;
 import frc.lib.Signal.Annotations.Signal;
 import frc.robot.Robot;
+import frc.Constants;
 
 public class WrapperedGyro  {
 
-    AbstractGyro gyro;
+    /* Singleton infrastructure */
+    private static WrapperedGyro instance;
+    public static WrapperedGyro getInstance() {
+        if (instance == null) {
+            instance = new WrapperedGyro(GyroType.NAVX);
+        }
+        return instance;
+    }
+    
+    
+
+    public AbstractGyro gyro;
     double offset_rad = 0;
 
     public enum GyroType {
@@ -18,12 +31,12 @@ public class WrapperedGyro  {
     @Signal(units = "rad")
     private double curAngle_rad;
 
-    public WrapperedGyro(GyroType type){
+    private WrapperedGyro(GyroType type){
         if(Robot.isReal()){
             if(type == GyroType.ADXRS453){
                 gyro = new RealADXRS453();
             } else if (type == GyroType.NAVX){
-
+                gyro = new RealNavx();
             }
         } else {
             gyro = new SimGyro();
@@ -33,7 +46,7 @@ public class WrapperedGyro  {
     public void update(){
         // Gyros are inverted in reference frame (positive clockwise)
         // and we maintain our own offset in code when rezeroing.
-        curAngle_rad = gyro.getRawAngle() * -1.0 + offset_rad;
+        curAngle_rad = gyro.getRawAngle() * -1.0 + offset_rad + Constants.GYRO_OFFSET_RAD;
     }
 
     public void reset(double curAngle_rad) {
@@ -60,5 +73,14 @@ public class WrapperedGyro  {
     public Rotation2d getRotation2d() {
         return new Rotation2d(this.getAngle_rad());
     }
+
+    public double getRoll_deg() {
+        return gyro.getRoll_deg();
+    }
+    
+    public double getPitch_deg() {
+        return gyro.getPitch_deg();
+    }
+
     
 }

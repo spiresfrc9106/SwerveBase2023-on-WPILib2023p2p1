@@ -27,7 +27,7 @@ public class RealTalonFX extends AbstractSimmableMotorController {
     public final double CMD_PER_V = 1023.0/12.0;
 
 
-    public RealTalonFX(int can_id){
+    public RealTalonFX(int can_id, double currentLimit){
         _talon = new WPI_TalonFX(can_id);
 
         boolean success = false;
@@ -49,7 +49,7 @@ public class RealTalonFX extends AbstractSimmableMotorController {
             var err8 = _talon.configVelocityMeasurementWindow(16, TIMEOUT_MS);
             var err9 = _talon.configVoltageCompSaturation(MAX_VOLTAGE, TIMEOUT_MS);
             
-            var err10 = _talon.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true, 40, 40, 0), TIMEOUT_MS);
+            var err10 = _talon.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true, currentLimit, currentLimit, 0), TIMEOUT_MS);
 
             //Reduce CAN bus rates on things we don't quite carea bout
             var err11 = _talon.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 21, TIMEOUT_MS); //Applied motor output, faults
@@ -88,6 +88,15 @@ public class RealTalonFX extends AbstractSimmableMotorController {
             }
 
         }
+    }
+
+    @Override
+    public void setCurrent_A(int currentLimit) {
+        _talon.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true, currentLimit, currentLimit, 0), TIMEOUT_MS);
+    }
+
+    @Override
+    public void setSoftLimits(float fwd, float rev, boolean e) {
     }
 
 

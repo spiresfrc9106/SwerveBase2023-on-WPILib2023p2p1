@@ -32,6 +32,7 @@ class SwerveModuleControl {
     frc.lib.Signal.Signal wheelSpdDesSig;
     frc.lib.Signal.Signal wheelSpdActSig;
 
+
     public AzimuthAngleController azmthCtrl;
 
     SimpleMotorFeedforward wheelMotorFF;
@@ -48,13 +49,13 @@ class SwerveModuleControl {
     double wheelMotorCmd;
 
     public SwerveModuleControl(String modName, int wheelMotorIdx, int azmthMotorIdx, int azmthEncoderIdx, double azmthOffset, boolean invertWheel){
+        wheelMotorCtrl = new WrapperedCANMotorCtrl("wheel"+modName, wheelMotorIdx, WrapperedCANMotorCtrl.CANMotorCtrlType.SPARK_MAX, Constants.CURRENT_LIMIT_WHLMOTOR_AMPS);
+        azmthMotorCtrl = new WrapperedCANMotorCtrl("azmth"+modName, azmthMotorIdx, WrapperedCANMotorCtrl.CANMotorCtrlType.SPARK_MAX, Constants.CURRENT_LIMIT_AZMOTOR_AMPS);
 
-        wheelMotorCtrl = new WrapperedCANMotorCtrl("wheel"+modName, wheelMotorIdx, WrapperedCANMotorCtrl.CANMotorCtrlType.TALON_FX);
-        azmthMotorCtrl = new WrapperedCANMotorCtrl("azmth"+modName, azmthMotorIdx, WrapperedCANMotorCtrl.CANMotorCtrlType.SPARK_MAX);
-        azmth_enc = new WrapperedSwerveAzmthEncoder(SwerveAzmthEncType.SRXEncoder, "encoder"+modName, azmthEncoderIdx, azmthOffset);
+        azmth_enc = new WrapperedSwerveAzmthEncoder(SwerveAzmthEncType.RevThroughBoreEncoder, "encoder"+modName, azmthEncoderIdx, azmthOffset);
       
         wheelMotorCtrl.setInverted(invertWheel);
-        azmthMotorCtrl.setInverted(true);
+        azmthMotorCtrl.setInverted(Constants.INVERT_AZMTH_MOTOR);
 
         azmthPosDesSig = new frc.lib.Signal.Signal(SwerveStateTopicSet.PREFIX + modName + SwerveStateTopicSet.SUFFIX_AZMTH_DES, "deg");
         azmthPosActSig = new frc.lib.Signal.Signal(SwerveStateTopicSet.PREFIX + modName + SwerveStateTopicSet.SUFFIX_AZMTH_ACT, "deg");

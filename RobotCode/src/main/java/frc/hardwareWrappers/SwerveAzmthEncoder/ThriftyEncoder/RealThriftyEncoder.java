@@ -10,7 +10,7 @@ public class RealThriftyEncoder extends AbstractSwerveAzmthEncoder {
     AnalogInput m_input;
     AnalogEncoder m_encoder;
 
-    @Signal(units="V")
+    //@Signal(units="V")
     double measVoltage;
 
     public RealThriftyEncoder(int port){

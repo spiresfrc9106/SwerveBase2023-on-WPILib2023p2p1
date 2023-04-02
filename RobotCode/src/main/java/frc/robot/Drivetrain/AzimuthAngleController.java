@@ -7,7 +7,7 @@ import frc.lib.Util.MapLookup2D;
 
 public class AzimuthAngleController{
 
-    final double MAX_AZMTH_SPEED_DEG_PER_SEC = 720.0; // TODO, maybe go faster?
+    final double MAX_AZMTH_SPEED_DEG_PER_SEC = 720.0; //YN: maybe go faster? (todo)
 
     PIDController azmthPIDCtrl = new PIDController(0,0,0);
 

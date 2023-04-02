@@ -12,11 +12,22 @@
 .outlined{
     border: 1px solid #FFFFFF;
     margin: 1px;
+    background: grey;
+}
+
+td {
+    font-family: 'localMichroma';
+    src: url('/fonts/Michroma-Regular.ttf')  format('truetype'), 
+         url('/fonts/michroma-regular-webfont.woff2') format('woff2'),
+         url('/fonts/michroma-regular-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+    color: white;
 }
 
 
 body {
-    background: black;
+    background: #1e429b;
     padding: 0.25em;
     margin: 0;
     font-size: 16px;
@@ -31,7 +42,7 @@ html,body {
 
 /* Fancy schmancy buttons */
 button {
-    background: #222222;
+    background: #F8CD46;
     padding: 6.5px 10px;
     margin: 6.5px 10px;
     -webkit-border-radius: 3px;
@@ -45,14 +56,14 @@ button {
     cursor:pointer;
  }
  button:hover {
-    background: #444;
+    background: #3C92E6;
     color: white;
  }
  button:active {
-    background: #333;
+    background: #F8CD46;
  }
  button:disabled {
-    background: black;
+    background: #141414;
     color: #555;
  }
 

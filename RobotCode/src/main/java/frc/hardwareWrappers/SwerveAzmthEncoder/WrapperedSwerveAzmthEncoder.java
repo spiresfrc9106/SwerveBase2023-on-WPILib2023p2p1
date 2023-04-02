@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.UnitUtils;
 import frc.hardwareWrappers.SwerveAzmthEncoder.CANCoder.RealCANCoder;
 import frc.hardwareWrappers.SwerveAzmthEncoder.SRXEncoder.RealSRXEncoder;
+import frc.hardwareWrappers.SwerveAzmthEncoder.RevEncoder.RealRevThroughBoreEncoder;
 import frc.hardwareWrappers.SwerveAzmthEncoder.Sim.SimSwerveAzmthEncoder;
 import frc.hardwareWrappers.SwerveAzmthEncoder.ThriftyEncoder.RealThriftyEncoder;
 import frc.lib.Calibration.Calibration;
@@ -17,7 +18,8 @@ public class WrapperedSwerveAzmthEncoder  {
     public enum SwerveAzmthEncType {
         SRXEncoder,
         CANCoder,
-        Thrifty
+        Thrifty,
+        RevThroughBoreEncoder 
     }
 
     @Signal(units="rad")
@@ -40,6 +42,9 @@ public class WrapperedSwerveAzmthEncoder  {
                 case Thrifty:
                     //ID = Analog Input
                     enc = new RealThriftyEncoder(id);
+                    break;
+                case RevThroughBoreEncoder:
+                    enc = new RealRevThroughBoreEncoder(id);
                     break;
             }
         } else {

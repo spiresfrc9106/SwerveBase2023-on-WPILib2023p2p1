@@ -12,7 +12,8 @@ public class VisionSystem {
 
     //Configure these to match the targets we'll see on the field.
     Pose3d fieldOrigin = new Pose3d();
-    Pose3d farTargetPose = fieldOrigin.transformBy(Constants.VISION_NEAR_TGT_LOCATION);
+    //yavinNote: uncomment when we get a camera and vision targets.
+    //Pose3d farTargetPose = fieldOrigin.transformBy(Constants.VISION_NEAR_TGT_LOCATION);
     //TODO add more targets here
 
     //200mm AprilTags

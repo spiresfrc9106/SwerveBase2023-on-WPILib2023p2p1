@@ -65,7 +65,7 @@ public class DrivetrainControl {
     // This class is designed to combine encoder measurments and gyro readings
     // and maybe vision processing (in the future), and produce a best-guess
     // as to where the robot is at on the field at any particular moment.
-    DrivetrainPoseEstimator pe;
+    public DrivetrainPoseEstimator pe;
 
     // Holonomic drive controller and its components
     PIDController hdc_fwdrev;
@@ -123,10 +123,10 @@ public class DrivetrainControl {
 
         hdc.setEnabled(true);
 
-        moduleFL = new SwerveModuleControl("FL", Constants.FL_WHEEL_MOTOR_CANID,Constants.FL_AZMTH_MOTOR_CANID,Constants.FL_AZMTH_ENC_IDX, Constants.FL_ENCODER_MOUNT_OFFSET_RAD, true);
-        moduleFR = new SwerveModuleControl("FR", Constants.FR_WHEEL_MOTOR_CANID,Constants.FR_AZMTH_MOTOR_CANID,Constants.FR_AZMTH_ENC_IDX, Constants.FR_ENCODER_MOUNT_OFFSET_RAD, false);
-        moduleBL = new SwerveModuleControl("BL", Constants.BL_WHEEL_MOTOR_CANID,Constants.BL_AZMTH_MOTOR_CANID,Constants.BL_AZMTH_ENC_IDX, Constants.BL_ENCODER_MOUNT_OFFSET_RAD, true);
-        moduleBR = new SwerveModuleControl("BR", Constants.BR_WHEEL_MOTOR_CANID,Constants.BR_AZMTH_MOTOR_CANID,Constants.BR_AZMTH_ENC_IDX, Constants.BR_ENCODER_MOUNT_OFFSET_RAD, false);          
+        moduleFL = new SwerveModuleControl("FL", Constants.FL_WHEEL_MOTOR_CANID,Constants.FL_AZMTH_MOTOR_CANID,Constants.FL_AZMTH_ENC_IDX, Constants.FL_ENCODER_MOUNT_OFFSET_RAD, Constants.INVERT_WHEEL_DIRECTION[Constants.FL]);
+        moduleFR = new SwerveModuleControl("FR", Constants.FR_WHEEL_MOTOR_CANID,Constants.FR_AZMTH_MOTOR_CANID,Constants.FR_AZMTH_ENC_IDX, Constants.FR_ENCODER_MOUNT_OFFSET_RAD, Constants.INVERT_WHEEL_DIRECTION[Constants.FR]);
+        moduleBL = new SwerveModuleControl("BL", Constants.BL_WHEEL_MOTOR_CANID,Constants.BL_AZMTH_MOTOR_CANID,Constants.BL_AZMTH_ENC_IDX, Constants.BL_ENCODER_MOUNT_OFFSET_RAD, Constants.INVERT_WHEEL_DIRECTION[Constants.BL]);
+        moduleBR = new SwerveModuleControl("BR", Constants.BR_WHEEL_MOTOR_CANID,Constants.BR_AZMTH_MOTOR_CANID,Constants.BR_AZMTH_ENC_IDX, Constants.BR_ENCODER_MOUNT_OFFSET_RAD, Constants.INVERT_WHEEL_DIRECTION[Constants.BR]);          
 
         pe = DrivetrainPoseEstimator.getInstance();
 
@@ -200,10 +200,21 @@ public class DrivetrainControl {
         } else {
             //Home Position
             desModState = new SwerveModuleState[4];
-            desModState[0] = new SwerveModuleState(0, Rotation2d.fromDegrees(-45));
-            desModState[1] = new SwerveModuleState(0, Rotation2d.fromDegrees(45));
-            desModState[2] = new SwerveModuleState(0, Rotation2d.fromDegrees(45));
-            desModState[3] = new SwerveModuleState(0, Rotation2d.fromDegrees(-45));
+		//YN: dead code here, will update later (todo)
+            if (true) { //def true
+                desModState[0] = new SwerveModuleState(0, Rotation2d.fromDegrees(-45));
+                desModState[1] = new SwerveModuleState(0, Rotation2d.fromDegrees(45));
+                desModState[2] = new SwerveModuleState(0, Rotation2d.fromDegrees(45));
+                desModState[3] = new SwerveModuleState(0, Rotation2d.fromDegrees(-45));
+            } else {
+                double angle = 0.0;
+                desModState[0] = new SwerveModuleState(0, Rotation2d.fromDegrees(angle));
+                desModState[1] = new SwerveModuleState(0, Rotation2d.fromDegrees(angle));
+                desModState[2] = new SwerveModuleState(0, Rotation2d.fromDegrees(angle));
+                desModState[3] = new SwerveModuleState(0, Rotation2d.fromDegrees(angle));
+    
+            }
+
         }
 
         if(initAngleOnly){
