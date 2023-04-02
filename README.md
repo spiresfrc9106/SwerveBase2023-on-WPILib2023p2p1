@@ -4,6 +4,8 @@ This source code was forked from https://github.com/gerth2/SwerveBase2023 which 
 
 The Spires would like to thank RobotCasserole - FRC 1736 for publishing this execllent swerve source code and giving us advice on how to use the code base!
 
+[Video of our autonoumous place, mobilitiy, and engage, then in teleop, jumping the charging station in our final East Kentwood District Match](https://www.youtube.com/watch?v=HQKJHTP1DtY).
+
 # Danger - Danger - Danger
 
 As a rookie team, when we modified the code base we didn't keep it up to the same high quality of the initial RobotCaserole code base. View our changes with caution.
