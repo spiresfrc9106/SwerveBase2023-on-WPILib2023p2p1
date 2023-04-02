@@ -1,4 +1,4 @@
-# Spires FRC 9106 Source Code for the 2022-2023 Energize - Charged Up Game
+# Spires FRC team number 9106 source code for the 2022-2023, Energize, Charged Up Game
 
 This source code was forked from https://github.com/gerth2/SwerveBase2023 which is based upon https://github.com/RobotCasserole1736/RobotCasserole2022 .
 
