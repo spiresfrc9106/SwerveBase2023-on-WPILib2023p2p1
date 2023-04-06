@@ -47,6 +47,20 @@ public class Autonomous {
     private static final String kAutoLeave = "Leave";
     private static final String kAutoBalance = "Balance";
     private final SendableChooser < String > m_chooser = new SendableChooser < > ();
+    boolean isRunning = false;
+    boolean allowedR = false;
+    String autoOption = kAutoNone;
+    boolean doPlaceStep = false;
+    boolean doLeaveStep = false;
+    boolean doBalanceStep = false;
+    RobotAutoState curState = RobotAutoState.GRABBING_CUBE;
+    @Signal
+    int curStateInt;
+    RobotAutoState prevState = RobotAutoState.WAITING;
+    @Signal
+    double pitchAngleForPlot = 0;
+    @Signal
+    double highestAngle = 0;
 
     /* Singleton infratructure*/
     private static Autonomous inst = null;
@@ -55,13 +69,6 @@ public class Autonomous {
             inst = new Autonomous();
         return inst;
     }
-
-    boolean isRunning = false;
-    boolean allowedR = false;
-    String autoOption = kAutoNone;
-    boolean doPlaceStep = false;
-    boolean doLeaveStep = false;
-    boolean doBalanceStep = false;
 
     private Autonomous() {
         m_chooser.setDefaultOption("No Auto", kAutoNone);
@@ -143,21 +150,11 @@ public class Autonomous {
         }
     }
 
-    RobotAutoState curState = RobotAutoState.GRABBING_CUBE;
-    @Signal
-    int curStateInt;
-    RobotAutoState prevState = RobotAutoState.WAITING;
-    @Signal
-    double pitchAngleForPlot = 0;
-    @Signal
-    double highestAngle = 0;
-
     public void update() {
         pitchAngleForPlot = balancer.getPitchAngle_deg();
         if (allowedR == true) {
             double currentTime = Timer.getFPGATimestamp();
             double timePassed = currentTime - autoStartTime;
-
             fsDashboardCurrentState = curState.toInt();
             switch (curState) {
                 case WAITING:
