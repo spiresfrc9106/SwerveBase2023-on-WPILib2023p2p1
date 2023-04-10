@@ -23,10 +23,27 @@
   },
   "NetworkTables": {
     "transitory": {
-      "LiveWindow": {
-        "open": true
+      "AdvantageKit": {
+        "RealMetadata": {
+          "open": true
+        },
+        "RealOutputs": {
+          "LoggedRobot": {
+            "open": true
+          },
+          "Logger": {
+            "open": true
+          },
+          "open": true
+        },
+        "SystemStats": {
+          "CANBus": {
+            "open": true
+          },
+          "open": true
+        }
       },
-      "Shuffleboard": {
+      "LiveWindow": {
         "open": true
       },
       "SmartDashboard": {
@@ -35,8 +52,7 @@
         },
         "Field": {
           "open": true
-        },
-        "open": true
+        }
       }
     }
   },
