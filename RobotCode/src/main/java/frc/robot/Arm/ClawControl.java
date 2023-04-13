@@ -13,14 +13,14 @@ public class ClawControl {
         return instance;
     }
 
-    frc.lib.Signal.Signal clawStateSig;
+    frc.lib.Signal.Signal clawStateSig; // The two claw finger modules under our control
     ClawFingerControl moduleL;
     ClawFingerControl moduleR;
     Calibration moduleClaw_kP;
     Calibration moduleClaw_kI;
     Calibration moduleClaw_kD;
-    Calibration moduleClaw_kV; 
-    Calibration moduleClaw_kS;
+    Calibration moduleClaw_kV; // Feed-forward Voltage Constat - IE, how many volts to get a certain amount of motor speed in radians per second?
+    Calibration moduleClaw_kS; // Feed-forward Static Constnat - IE, how many volts to overcome static friction and get any motion at all?
     ChassisSpeeds desFingSpd = new ChassisSpeeds(0, 0, 0);
     double desFingSpdVx;
     double desFingSpdVy;
@@ -41,7 +41,11 @@ public class ClawControl {
         calUpdate(true);
     }
 
+    // Pass the current calibration values downard into child classes.
     public void calUpdate(boolean force) {
+        // Guard these Cal updates with isChanged because they write to motor controllers
+        // and that soaks up can bus bandwidth, which we don't want.
+        // There's probably a better and clearner way to do this, but it works for now.
         if (moduleClaw_kP.isChanged() ||
             moduleClaw_kI.isChanged() ||
             moduleClaw_kD.isChanged() ||
@@ -57,6 +61,7 @@ public class ClawControl {
         }
     }
 
+    // Cause all non-annotated signals to broadcast a new value for the loop.
     public void updateTelemetry() {
         moduleL.updateTelemetry();
         moduleR.updateTelemetry();
@@ -64,10 +69,10 @@ public class ClawControl {
 
     public enum AutoClawFingerCtrl {
         OPEN_PHALANGES(0),
-            CLOSE_FOR_CUBE(1),
-            CLOSE_FOR_CONE(2),
-            STOP_PHALANGES(3),
-            KEEP_MOVING(4);
+        CLOSE_FOR_CUBE(1),
+        CLOSE_FOR_CONE(2),
+        STOP_PHALANGES(3),
+        KEEP_MOVING(4);
         public final int fingerstate;
         private AutoClawFingerCtrl(int fingerstate) {
             this.fingerstate = fingerstate;
@@ -79,11 +84,11 @@ public class ClawControl {
 
     public enum AutoFingerState {
         OPEN_PHALANGES(0),
-            CLOSE_FOR_CUBE(1),
-            CLOSE_FOR_CONE(2),
-            STOP_PHALANGES(3),
-            CURRENT_LIMIT_CLOSE(4),
-            CURRENT_LIMIT_OPEN(5);
+        CLOSE_FOR_CUBE(1),
+        CLOSE_FOR_CONE(2),
+        STOP_PHALANGES(3),
+        CURRENT_LIMIT_CLOSE(4),
+        CURRENT_LIMIT_OPEN(5);
         public final int fingerstate;
         private AutoFingerState(int fingerstate) {
             this.fingerstate = fingerstate;

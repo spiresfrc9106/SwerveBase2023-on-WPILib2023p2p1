@@ -16,11 +16,13 @@ public class ArmPivotControl {
         return instance;
     }
 
+    // Common PID Calibrations for modules
     Calibration moduleArmPivot_kP;
     Calibration moduleArmPivot_kI;
     Calibration moduleArmPivot_kD;
-    Calibration moduleArmPivot_kV;
-    Calibration moduleArmPivot_kS;
+    Calibration moduleArmPivot_kV; // Feed-forward Voltage Constat - IE, how many volts to get a certain amount of motor speed in radians per second?
+    Calibration moduleArmPivot_kS; // Feed-forward Static Constnat - IE, how many volts to overcome static friction and get any motion at all?
+    
     WrapperedSwerveAzmthEncoder pivot_enc;
     ArmMotorControl moduleB;
     AutoArmPivotCtrl curCmd = AutoArmPivotCtrl.STOP_MOVEMT;
@@ -55,8 +57,10 @@ public class ArmPivotControl {
         moduleB = new ArmMotorControl("B", Constants.B_ARM_MOTOR_CANID, Constants.INVERT_ARM_DIRECTION);
         calUpdate(true);
     }
-
-    public void calUpdate(boolean force) {
+    
+    // Pass the current calibration values downard into child classes.
+    public void calUpdate(boolean force){
+        // guard these Cal updates with isChanged because they write to motor controlelrs
         if (moduleArmPivot_kP.isChanged() ||
             moduleArmPivot_kI.isChanged() ||
             moduleArmPivot_kD.isChanged() ||

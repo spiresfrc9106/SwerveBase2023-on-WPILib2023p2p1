@@ -124,7 +124,8 @@ public class Autonomous {
     public void blockRun() {
         allowedR = false;
     }
-
+    
+    /* This should be called periodically in Disabled, and once in auto init */
     public void sampleDashboardSelector() {}
 
     public enum RobotAutoState {

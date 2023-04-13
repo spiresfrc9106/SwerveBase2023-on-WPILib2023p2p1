@@ -1,3 +1,5 @@
+// Copyright (c) FIRST and other WPILib contributors.
+
 package frc.robot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -27,9 +29,19 @@ import frc.robot.Arm.ClawControl.AutoClawFingerCtrl;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.RobotController;
 
+/**
+ * The VM is configured to automatically run this class, and to call the functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the name of this class or
+ * the package after creating this project, you must also update the build.gradle file in the
+ * project.
+ */
 public class Robot extends TimedRobot {
     private boolean enableCameras = false;
     public static double loopStartTime;
+
+    ///////////////////////////////////////////////////////////////////
+    // Instatntiate new classes after here 
+    // ...
     // Website utilities
     Webserver2 webserver;
     Dashboard db;
@@ -52,19 +64,26 @@ public class Robot extends TimedRobot {
     // Cameras
     CenterCamera cc;
     SegmentTimeTracker stt;
-    // Signals
+    // Other
     @Signal(units = "sec")
     double mainLoopDuration;
     @Signal(units = "sec")
     double mainLoopPeriod;
     @Signal(units = "in")
     double sonarDistance_in = 0;
-    // Other
     public double arm_speed_radpersec;
     final double ANGULAR_P = 0.1;
     final double ANGULAR_D = 0.0;
     PIDController turnController = new PIDController(ANGULAR_P, 0, ANGULAR_D);
     private final AnalogInput ultrasonic = new AnalogInput(0);
+
+    // ... 
+    // But before here
+    ///////////////////////////////////////////////////////////////////
+
+    ///////////////////////////////////////////////////////////////////
+    // Do one-time initilization here
+    ///////////////////////////////////////////////////////////////////
 
     @Override
     public void robotInit() {
@@ -75,6 +94,7 @@ public class Robot extends TimedRobot {
         stt.mark("LW Disable");
         NetworkTableInstance.getDefault().startServer();
         stt.mark("NT4");
+        /* Init website utilties */
         webserver = new Webserver2();
         stt.mark("Webserver2");
         cw = CalWrangler.getInstance();
@@ -121,6 +141,9 @@ public class Robot extends TimedRobot {
         stt.end();
     }
 
+    ///////////////////////////////////////////////////////////////////
+    // Autonomous-Specific
+    ///////////////////////////////////////////////////////////////////
     @Override
     public void autonomousInit() {
         SignalWrangler.getInstance().logger.startLoggingAuto();
@@ -137,6 +160,9 @@ public class Robot extends TimedRobot {
         stt.mark("Auto Update");
     }
 
+    ///////////////////////////////////////////////////////////////////
+    // Teleop-Specific
+    ///////////////////////////////////////////////////////////////////
     @Override
     public void teleopInit() {
         auto.blockRun();
@@ -150,6 +176,10 @@ public class Robot extends TimedRobot {
         di.update();
         pi.update();
         stt.mark("Driver Input");
+
+        /////////////////////////////////////
+        // Drivetrain Input Mapping
+
         boolean automaticSwerve = false;
         if (di.getdoAutoObjectAlign()) {
             automaticSwerve = true;
@@ -162,7 +192,8 @@ public class Robot extends TimedRobot {
             fng.setFinger(AutoClawFingerCtrl.CLOSE_FOR_CONE);
         } else if (pi.getClawStop()) {
             fng.setFinger(AutoClawFingerCtrl.STOP_PHALANGES);
-        } else {}
+        } else {
+        }
         boolean armExistsAngle = false;
         double desiredArmAngle = -2;
         if (pi.getArmDown()) {
@@ -200,7 +231,6 @@ public class Robot extends TimedRobot {
             }
         } else {
             arm_speed_radpersec = pi.getArmSpeed_radpersec();
-
             armPvt.setArmSpeed(arm_speed_radpersec);
             if (arm_speed_radpersec < 0) {
                 armPvt.setArmSpeed(arm_speed_radpersec);
@@ -211,7 +241,6 @@ public class Robot extends TimedRobot {
                 armPvt.setArm(AutoArmPivotCtrl.STOP_MOVEMT);
             }
         }
-
         if (pi.getRemoveSoftLimits() == true) {
             System.out.println("Disabled soft limits for Robot Arm");
         }
@@ -268,12 +297,16 @@ public class Robot extends TimedRobot {
             db.bumpthree = false;
         }
         if (di.getOdoResetCmd()) {
+            //Reset pose estimate to angle 0, but at the same translation we're at
             Pose2d newPose = new Pose2d(dt.getCurEstPose().getTranslation(), new Rotation2d(0.0));
             dt.setKnownPose(newPose);
         }
         stt.mark("Human Input Mapping");
     }
 
+    ///////////////////////////////////////////////////////////////////
+    // Disabled-Specific
+    ///////////////////////////////////////////////////////////////////
     @Override
     public void disabledInit() {
         SignalWrangler.getInstance().logger.stopLogging();
@@ -289,6 +322,9 @@ public class Robot extends TimedRobot {
         stt.mark("Auto Mode Update");
     }
 
+    ///////////////////////////////////////////////////////////////////
+    // Common Periodic updates
+    ///////////////////////////////////////////////////////////////////
     @Override
     public void robotPeriodic() {
         sonarDistance_in = getSonarDistance();
@@ -330,6 +366,10 @@ public class Robot extends TimedRobot {
         SignalWrangler.getInstance().sampleAllSignals(time);
     }
 
+    ///////////////////////////////////////////////////////////////////
+    // Test-Mode-Specific
+    ///////////////////////////////////////////////////////////////////
+
     @Override
     public void testInit() {
         dt.testInit();
@@ -340,6 +380,10 @@ public class Robot extends TimedRobot {
         stt.start();
         loopStartTime = Timer.getFPGATimestamp();
     }
+
+    ///////////////////////////////////////////////////////////////////
+    // Simulation Support
+    ///////////////////////////////////////////////////////////////////
 
     RobotModel plant;
     public void simulationSetup() {
