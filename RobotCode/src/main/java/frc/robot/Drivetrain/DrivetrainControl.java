@@ -200,8 +200,8 @@ public class DrivetrainControl {
         } else {
             //Home Position
             desModState = new SwerveModuleState[4];
-		//YN: dead code here, will update later (todo)
-            if (true) { //def true
+            //YN: dead code here, will update later (todo)
+            if (true) { 
                 desModState[0] = new SwerveModuleState(0, Rotation2d.fromDegrees(-45));
                 desModState[1] = new SwerveModuleState(0, Rotation2d.fromDegrees(45));
                 desModState[2] = new SwerveModuleState(0, Rotation2d.fromDegrees(45));

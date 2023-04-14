@@ -126,7 +126,9 @@ public class Autonomous {
     }
     
     /* This should be called periodically in Disabled, and once in auto init */
-    public void sampleDashboardSelector() {}
+    public void sampleDashboardSelector() {
+        isRunning = false;
+    }
 
     public enum RobotAutoState {
         WAITING(0),
