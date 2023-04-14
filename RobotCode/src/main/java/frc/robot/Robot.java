@@ -1,4 +1,6 @@
 // Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
 import edu.wpi.first.wpilibj.Timer;
@@ -101,6 +103,8 @@ public class Robot extends TimedRobot {
         stt.mark("Cal Wrangler");
         loadMon = new RIOLoadMonitor();
         stt.mark("RIO Load Monitor");
+        //yavinNote: uncomment to debug the battery monitor; why is the battery monitor crashing?
+        //batMan = BatteryMonitor.getInstance();
         stt.mark("Battery Monitor");
         stt.mark("Ball Color Detector");
         di = new DriverInput(0);
@@ -114,6 +118,7 @@ public class Robot extends TimedRobot {
         armPvt = ArmPivotControl.getInstance();
         stt.mark("Arm Pivot Control");
         auto = Autonomous.getInstance();
+        //auto.loadSequencer();
         stt.mark("Autonomous");
         autoalign = AutoPickupSystem.getInstance();
         pt = PoseTelemetry.getInstance();
@@ -372,6 +377,7 @@ public class Robot extends TimedRobot {
 
     @Override
     public void testInit() {
+        // Tell the subsystems that care that we're entering test mode.
         dt.testInit();
     }
 
